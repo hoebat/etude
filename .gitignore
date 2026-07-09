@@ -33,3 +33,4 @@ projects
 .org-id-locations
 /quelpa/
 /infra/*/build
+/eln-cache/

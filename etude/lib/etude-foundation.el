@@ -43,11 +43,11 @@
   (interactive)
   (save-buffer)
   (cider-eval-buffer)
-  (foundation/cider-eval "(std.lang/print-module)"))
+  (foundation/cider-eval "(hara.lang/print-module)"))
 
 (defun foundation/rt-restart ()
   (interactive)
-  (foundation/cider-eval "(std.lang/rt:restart)"))
+  (foundation/cider-eval "(hara.lang/rt:restart)"))
 
 (defun foundation/ns-clear ()
   (interactive)
@@ -112,40 +112,40 @@
 (defun foundation/ptr-teardown ()
   (interactive)
   (foundation/cider-eval-at-point
-   (concat "(std.lang/with:print-all (std.lang/ptr-teardown " (cider-last-sexp) "))")))
+   (concat "(hara.lang/with:print-all (hara.lang/ptr-teardown " (cider-last-sexp) "))")))
 
 (defun foundation/ptr-setup ()
   (interactive)
   (foundation/cider-eval-at-point
-   (concat "(std.lang/with:print-all (std.lang/ptr-setup " (cider-last-sexp) "))")))
+   (concat "(hara.lang/with:print-all (hara.lang/ptr-setup " (cider-last-sexp) "))")))
 
 (defun foundation/ptr-teardown-deps ()
   (interactive)
   (foundation/cider-eval-at-point
-   (concat "(std.lang/with:print-all (std.lang/ptr-teardown-deps " (cider-last-sexp) "))")))
+   (concat "(hara.lang/with:print-all (hara.lang/ptr-teardown-deps " (cider-last-sexp) "))")))
 
 (defun foundation/ptr-setup-deps ()
   (interactive)
   (foundation/cider-eval-at-point
-   (concat "(std.lang/with:print-all (std.lang/ptr-setup-deps " (cider-last-sexp) "))")))
+   (concat "(hara.lang/with:print-all (hara.lang/ptr-setup-deps " (cider-last-sexp) "))")))
 
 (defun foundation/ptr-emit ()
   (interactive)
   (foundation/cider-eval-at-point
-   (concat "(std.lang/emit-ptr" (cider-last-sexp) ")")))
+   (concat "(hara.lang/emit-ptr" (cider-last-sexp) ")")))
 
 (defun foundation/rt-module-purge ()
   (interactive)
   (save-buffer)
-  (foundation/cider-eval "(std.lang/rt:module-purge)"))
+  (foundation/cider-eval "(hara.lang/rt:module-purge)"))
 
 (defun foundation/ptr-print-or-clip (&optional prefix)
   (interactive "P")
   (if prefix
       (foundation/cider-eval-at-point
-       (concat "(std.lang/ptr-print " (cider-last-sexp) ")"))
+       (concat "(hara.lang/ptr-print " (cider-last-sexp) ")"))
     (foundation/cider-eval-at-point
-     (concat "(std.lang/ptr-clip " (cider-last-sexp) ")"))))
+     (concat "(hara.lang/ptr-clip " (cider-last-sexp) ")"))))
 
 (defun foundation/ptr-redis-print-or-clip (&optional prefix)
   (interactive "P")

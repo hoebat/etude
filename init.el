@@ -84,7 +84,7 @@
  ;; If there is more than one, they won't work right.
  '(blink-cursor-mode nil)
  '(custom-safe-themes
-   '("46f5e010e0118cc5aaea1749cc6a15be4dfce27c0a195a0dff40684e2381cf87" default))
+   '("5a4cdc4365122d1a17a7ad93b6e3370ffe95db87ed17a38a94713f6ffe0d8ceb" "46f5e010e0118cc5aaea1749cc6a15be4dfce27c0a195a0dff40684e2381cf87" default))
  '(doom-modeline-icon nil)
  '(eros-mode t)
  '(global-linum-mode nil)

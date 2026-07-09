@@ -87,10 +87,7 @@
  '(blink-cursor-mode nil)
  '(custom-enabled-themes 'nord)
  '(custom-safe-themes
-   '("5a4cdc4365122d1a17a7ad93b6e3370ffe95db87ed17a38a94713f6ffe0d8ceb"
-     "4c7228157ba3a48c288ad8ef83c490b94cb29ef01236205e360c2c4db200bb18"
-     "46f5e010e0118cc5aaea1749cc6a15be4dfce27c0a195a0dff40684e2381cf87"
-     default))
+   '("5a4cdc4365122d1a17a7ad93b6e3370ffe95db87ed17a38a94713f6ffe0d8ceb" "46f5e010e0118cc5aaea1749cc6a15be4dfce27c0a195a0dff40684e2381cf87" default))
  '(doom-modeline-icon nil)
  '(eros-mode t)
  '(global-linum-mode nil)

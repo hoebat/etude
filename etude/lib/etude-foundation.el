@@ -1,4 +1,125 @@
+(require 'cl-lib)
 (require 'cider)
+
+(defcustom foundation/std-lang-project-root
+  "/Users/chris/Development/greenways/gw-v2/ref/foundation"
+  "Root directory for the foundation hara.lang sources."
+  :type 'directory)
+
+(defconst foundation/std-lang-dsl-form-heads
+  '("def.xt" "def.js" "defn.xt" "defn.js"))
+
+(defvar foundation/std-lang-dsl-symbol-cache
+  (make-hash-table :test #'equal))
+
+(defun foundation/std-lang--buffer-in-project-p ()
+  (let ((file (or buffer-file-name default-directory))
+        (root (and foundation/std-lang-project-root
+                   (expand-file-name foundation/std-lang-project-root))))
+    (and file
+         root
+         (file-directory-p root)
+         (file-in-directory-p (expand-file-name file)
+                              (file-name-as-directory root)))))
+
+(defun foundation/std-lang--symbol-bounds ()
+  (save-excursion
+    (skip-chars-backward "[:alnum:]*+!?.<>:=/_-")
+    (let ((start (point)))
+      (skip-chars-forward "[:alnum:]*+!?.<>:=/_-")
+      (let ((end (point)))
+        (and (< start end)
+             (cons start end))))))
+
+(defun foundation/std-lang--inside-dsl-form-p ()
+  (unless (or (nth 3 (syntax-ppss))
+              (nth 4 (syntax-ppss)))
+    (save-excursion
+      (let (found)
+        (while (and (not found)
+                    (condition-case nil
+                        (progn
+                          (backward-up-list 1)
+                          t)
+                      (error nil)))
+          (when (looking-at-p "(")
+            (forward-char 1)
+            (skip-syntax-forward " ")
+            (let ((head (symbol-at-point)))
+              (when (and head
+                         (member (symbol-name head)
+                                 foundation/std-lang-dsl-form-heads))
+                (setq found t))))
+          (unless found
+            (goto-char (max (point-min) (1- (point))))))
+        found))))
+
+(defun foundation/std-lang--collect-dsl-symbols-fallback (root)
+  (let (out)
+    (dolist (file (directory-files-recursively root "\\.clj[cx]?\\'"))
+      (with-temp-buffer
+        (insert-file-contents file)
+        (goto-char (point-min))
+        (while (re-search-forward "x:[A-Za-z0-9*+!?.<>:=/_-]+" nil t)
+          (push (match-string-no-properties 0) out))))
+    (sort (delete-dups out) #'string<)))
+
+(defun foundation/std-lang-refresh-dsl-cache (&optional root)
+  (interactive)
+  (let* ((root (expand-file-name (or root foundation/std-lang-project-root)))
+         (src-root (expand-file-name "src" root))
+         (symbols
+          (or (ignore-errors
+                (sort
+                 (delete-dups
+                 (process-lines "rg"
+                                 "-o"
+                                 "-N"
+                                 "--no-filename"
+                                 "-g" "*.clj"
+                                 "-g" "*.cljc"
+                                 "x:[A-Za-z0-9*+!?.<>:=/_-]+"
+                                 src-root))
+                 #'string<))
+              (foundation/std-lang--collect-dsl-symbols-fallback src-root))))
+    (puthash root symbols foundation/std-lang-dsl-symbol-cache)
+    (when (called-interactively-p 'interactive)
+      (message "foundation hara.lang DSL cache refreshed (%s symbols)"
+               (length symbols)))
+    symbols))
+
+(defun foundation/std-lang--dsl-symbols ()
+  (let ((root (expand-file-name foundation/std-lang-project-root)))
+    (or (gethash root foundation/std-lang-dsl-symbol-cache)
+        (foundation/std-lang-refresh-dsl-cache root))))
+
+(defun foundation/std-lang-dsl-capf ()
+  (when (and (foundation/std-lang--buffer-in-project-p)
+             (foundation/std-lang--inside-dsl-form-p))
+    (let* ((bounds (foundation/std-lang--symbol-bounds))
+           (start (and bounds (car bounds)))
+           (end (and bounds (cdr bounds))))
+      (when bounds
+        (let ((prefix (buffer-substring-no-properties start end)))
+          (when (string-prefix-p "x" prefix)
+            (list start
+                  end
+                  (completion-table-dynamic
+                   (lambda (input)
+                     (all-completions input
+                                      (foundation/std-lang--dsl-symbols))))
+                  :exclusive 'no
+                  :annotation-function (lambda (_candidate) " dsl"))))))))
+
+(defun foundation/std-lang-setup-dsl-completion ()
+  (when (foundation/std-lang--buffer-in-project-p)
+    (setq-local completion-at-point-functions
+                (cons #'foundation/std-lang-dsl-capf
+                      (remove #'foundation/std-lang-dsl-capf
+                              completion-at-point-functions)))))
+
+(add-hook 'clojure-mode-hook #'foundation/std-lang-setup-dsl-completion)
+(add-hook 'cider-mode-hook #'foundation/std-lang-setup-dsl-completion)
 
 (defun foundation/debug-last-sexp ()
   (interactive)
@@ -16,7 +137,7 @@
 
 (defun foundation/cider-eval-at-point (code)
   (interactive)
-  (message code)
+  (message "%s" code)
   (cider-interactive-eval
    code
    (cider-interactive-eval-handler nil (point))
@@ -43,11 +164,11 @@
   (interactive)
   (save-buffer)
   (cider-eval-buffer)
-  (foundation/cider-eval "(std.lang/print-module)"))
+  (foundation/cider-eval "(hara.lang/print-module)"))
 
 (defun foundation/rt-restart ()
   (interactive)
-  (foundation/cider-eval "(std.lang/rt:restart)"))
+  (foundation/cider-eval "(hara.lang/rt:restart)"))
 
 (defun foundation/ns-clear ()
   (interactive)
@@ -112,40 +233,40 @@
 (defun foundation/ptr-teardown ()
   (interactive)
   (foundation/cider-eval-at-point
-   (concat "(std.lang/with:print-all (std.lang/ptr-teardown " (cider-last-sexp) "))")))
+   (concat "(hara.lang/with:print-all (hara.lang/ptr-teardown " (cider-last-sexp) "))")))
 
 (defun foundation/ptr-setup ()
   (interactive)
   (foundation/cider-eval-at-point
-   (concat "(std.lang/with:print-all (std.lang/ptr-setup " (cider-last-sexp) "))")))
+   (concat "(hara.lang/with:print-all (hara.lang/ptr-setup " (cider-last-sexp) "))")))
 
 (defun foundation/ptr-teardown-deps ()
   (interactive)
   (foundation/cider-eval-at-point
-   (concat "(std.lang/with:print-all (std.lang/ptr-teardown-deps " (cider-last-sexp) "))")))
+   (concat "(hara.lang/with:print-all (hara.lang/ptr-teardown-deps " (cider-last-sexp) "))")))
 
 (defun foundation/ptr-setup-deps ()
   (interactive)
   (foundation/cider-eval-at-point
-   (concat "(std.lang/with:print-all (std.lang/ptr-setup-deps " (cider-last-sexp) "))")))
+   (concat "(hara.lang/with:print-all (hara.lang/ptr-setup-deps " (cider-last-sexp) "))")))
 
 (defun foundation/ptr-emit ()
   (interactive)
   (foundation/cider-eval-at-point
-   (concat "(std.lang/emit-ptr" (cider-last-sexp) ")")))
+   (concat "(hara.lang/emit-ptr" (cider-last-sexp) ")")))
 
 (defun foundation/rt-module-purge ()
   (interactive)
   (save-buffer)
-  (foundation/cider-eval "(std.lang/rt:module-purge)"))
+  (foundation/cider-eval "(hara.lang/rt:module-purge)"))
 
 (defun foundation/ptr-print-or-clip (&optional prefix)
   (interactive "P")
   (if prefix
       (foundation/cider-eval-at-point
-       (concat "(std.lang/ptr-print " (cider-last-sexp) ")"))
+       (concat "(hara.lang/ptr-print " (cider-last-sexp) ")"))
     (foundation/cider-eval-at-point
-     (concat "(std.lang/ptr-clip " (cider-last-sexp) ")"))))
+     (concat "(hara.lang/ptr-clip " (cider-last-sexp) ")"))))
 
 (defun foundation/ptr-redis-print-or-clip (&optional prefix)
   (interactive "P")
@@ -239,6 +360,14 @@
                           (cider--nrepl-pr-request-map)))
 
 (defun foundation/print-or-clip-last-expr (&optional prefix)
+  (interactive)
+  (if prefix
+      (foundation/cider-eval-at-point
+       (concat "(std.lib/prf " (cider-last-sexp) ")"))
+    (foundation/cider-eval-at-point
+     (concat "(std.lib/clip:nil " (cider-last-sexp) ")"))))
+
+(defun foundation/print-or-clip-last-expr-backup (&optional prefix)
   (interactive)
   (if prefix
       (foundation/cider-eval-at-point

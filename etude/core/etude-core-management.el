@@ -61,7 +61,16 @@
 (use-package projectile
   :ensure t
   :diminish 'projectile-mode
-  :init (setq projectile-completion-system 'ivy))
+  :init (setq projectile-completion-system 'ivy)
+  :config
+  ;; Define test file patterns for generic projects
+  (setq projectile-test-prefix "test_")
+  (setq projectile-test-suffix "_test")
+  ;; Register common project types
+  (projectile-register-project-type 'generic
+                                    '()
+                                    :test-prefix "test_"
+                                    :test-suffix "_test"))
 
 (use-package ibuffer-projectile :ensure t
   :config (add-hook 'ibuffer-hook

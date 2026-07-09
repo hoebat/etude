@@ -14,9 +14,12 @@
        (add-to-list 'load-path (concat emacs-d "etude"))
        (add-to-list 'load-path (concat emacs-d "dev/" "eta"))
        (add-to-list 'load-path (concat emacs-d "dev/" "eta-hydra"))
-       (add-to-list 'load-path (concat emacs-d "dev/" "eta-logger")))
+       (add-to-list 'load-path (concat emacs-d "dev/" "eta-logger"))
+       (add-to-list 'load-path (concat emacs-d "dev/" "midje-mode")))
 
 (setq use-package-always-ensure nil)
+
+(defcustom cider-use-xref nil "NO XREF FOR CIDER")
 
 ;; Core
 (require 'etude-boot)
@@ -36,8 +39,7 @@
 (require 'etude-bindings)
 (require 'etude-foundation)
 
-(progn
-  (eta-logger-start))
+(setq custom-safe-themes t)
 
 (if (not (window-system))
     (custom-set-faces
@@ -83,20 +85,31 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(blink-cursor-mode nil)
+ '(custom-enabled-themes 'nord)
  '(custom-safe-themes
-   '("46f5e010e0118cc5aaea1749cc6a15be4dfce27c0a195a0dff40684e2381cf87" default))
+   '("5a4cdc4365122d1a17a7ad93b6e3370ffe95db87ed17a38a94713f6ffe0d8ceb"
+     "4c7228157ba3a48c288ad8ef83c490b94cb29ef01236205e360c2c4db200bb18"
+     "46f5e010e0118cc5aaea1749cc6a15be4dfce27c0a195a0dff40684e2381cf87"
+     default))
  '(doom-modeline-icon nil)
  '(eros-mode t)
  '(global-linum-mode nil)
  '(nord-comment-brightness 20)
  '(org-babel-load-languages
-   '((emacs-lisp . t)
-     (js . t)
-     (python . t)
-     (shell . t)
-     (dot . t)
+   '((emacs-lisp . t) (js . t) (python . t) (shell . t) (dot . t)
      (java . t)))
  '(org-mouse-1-follows-link 'double)
  '(org-support-shift-select 'always)
  '(package-selected-packages
-   '(doom-modeline-mode lua-mode irony ibuffer-projectile eta nginx-mode format-all ob-async plain-org-wiki org-cliplink auto-highlight-symbol doom-modeline nord-theme ivy-rich counsel-projectile counsel swiper wgrep ivy smex treemacs-projectile treemacs dashboard projectile ranger dired-filter dired-collapse dired-subtree no-littering impatient-mode yasnippet goto-chg iedit undo-tree goggles bufler ace-window which-key tldr helpful multi-vterm vterm exec-path-from-shell midje-mode cider rainbow-delimiters paredit smartparens git-gutter graphviz-dot-mode markdown-mode dockerfile-mode yaml-mode company pretty-hydra hydra f ht dash s use-package)))
+   '(auto-highlight-symbol cider clay company-fuzzy counsel-projectile
+                           dashboard dired-collapse dired-filter
+                           dired-subtree doom-modeline eros
+                           exec-path-from-shell git-gutter goggles
+                           gptel ibuffer-projectile ivy-rich
+                           markdown-mode minuet no-littering
+                           nord-theme paredit pretty-hydra
+                           rainbow-delimiters smartparens smex
+                           treemacs-projectile undo-tree vterm)))
+
+(when (display-graphic-p)
+  (load-theme 'nord t))

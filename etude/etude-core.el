@@ -4,5 +4,4 @@
 (require 'etude-core-management)
 (require 'etude-core-shell)
 (require 'etude-core-style)
-
 (provide 'etude-core)

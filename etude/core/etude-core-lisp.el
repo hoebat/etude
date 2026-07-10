@@ -124,6 +124,8 @@
                (setq nrepl-buffer-name-show-port t)
                (setq cider-prefer-local-resources t)
                (setq cider-repl-use-clojure-font-lock t))
+  :bind (:map cider-mode-map
+         ("M-." . cider-find-var))
   :hook ((cider-repl-mode . smartparens-strict-mode)
          (cider-repl-mode . rainbow-delimiters-mode)
          (cider-repl-mode . eldoc-mode)))
@@ -148,7 +150,7 @@
                    
                    ::f8                'foundation/test-setup-global
                    ::esc-f8            'foundation/test-teardown-global
-
+                   ::f9                'clay-make-ns-quarto-html
                    ::f10               'e/cider-eval-buffer
 
                    ::cc-0              'foundation/print-or-clip-last-expr
@@ -167,12 +169,11 @@
          (clojure-mode . eldoc-mode)))
 
 
-;; (use-package midje-mode
-;;   :ensure t
-;;   :config (progn (define-clojure-indent
-;;                    (comment 'defun))
-;; 		 (define-clojure-indent
-;;                    (fn:> :defn))))
+(require 'midje-mode)
+(progn (define-clojure-indent
+         (comment 'defun))
+       (define-clojure-indent
+         (fn:> :defn)))
 
 (provide 'etude-core-lisp)
 

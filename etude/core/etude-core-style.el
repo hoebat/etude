@@ -13,8 +13,7 @@
   (when (fboundp mode) (funcall mode -1)))
 
 (use-package nord-theme
-  :ensure t
-  :init (load-theme 'nord t))
+  :ensure t)
 
 (use-package doom-modeline :ensure t
   :init (doom-modeline-mode))

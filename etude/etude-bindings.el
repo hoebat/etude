@@ -49,8 +49,8 @@
   ::paste           ("C-v" "M-v" "C-y")           'yank
   ::paste-menu      ("C-x C-v" "C-x v" "C-x y" "C-x C-y")
   'counsel-yank-pop
-  ::undo            ("C-w")                       'undo-tree-undo
-  ::redo            ("C-x w" "C-x C-w")           'undo-tree-redo
+  ::undo            ("C-w")                       'undo
+  ::redo            ("C-x w" "C-x C-w")           'undo-redo
   ::comment         ("ESC ;" "C-x ;" "C-x C-;")   'comment-or-uncomment-region)
 
 ;;
@@ -102,7 +102,8 @@
   ::jump-same            ("C-x i" "C-x C-i") 'swiper-thing-at-point
   ::jump-bookmark        ()           'counsel-bookmark
   ::jump-search-project  ("C-f")      'counsel-rg
-  ::jump-search-symbol   ("C-c s")    'color-rg-search-symbol) 
+  ::jump-search-symbol   ("C-c s")    'color-rg-search-symbol
+  ::toggle-test-impl     ("C-x T" "C-x C-t") 'projectile-toggle-between-implementation-and-test) 
 
 ;;;
 ;; (System and Files)

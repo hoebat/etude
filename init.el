@@ -28,6 +28,59 @@
 (use-package counsel-projectile :ensure t)
 (use-package vterm :ensure t)
 
+;; Core chat / rewrite / context
+(use-package gptel
+  :ensure t
+  :custom
+  (gptel-default-mode 'org-mode)
+  :config
+  ;; ChatGPT Plus/Pro / OpenAI subscription path.
+  ;; gptel supports an OAuth backend for OpenAI subscription access.
+  ;; Use this if you want ChatGPT-style subscription access inside Emacs.
+  (gptel-make-openai-oauth "OpenAI-sub")
+
+  ;; OpenAI Codex / API-key path.
+  ;; Uses the standard OpenAI API with Codex-capable models.
+  (gptel-make-openai "Codex"
+    :host "api.openai.com"
+    :key (lambda ()
+           (or (auth-source-pick-first-password
+                :host "api.openai.com"
+                :user "apikey")
+               (getenv "OPENAI_API_KEY")))
+    :stream t
+    :models '("gpt-5.5"
+              "gpt-5.4"
+              "gpt-5.4-mini"
+              "gpt-5.3-codex-spark"))
+
+  ;; Kimi / Kimi Code API path.
+  ;; Kimi Code uses api.kimi.com/coding with OpenAI-compatible endpoints.
+  ;; This endpoint requires a coding-agent User-Agent for authorization.
+  (gptel-make-openai "Kimi"
+    :host "api.kimi.com"
+    :endpoint "/coding/v1/chat/completions"
+    :key (lambda ()
+           (or (auth-source-pick-first-password
+                :host "api.kimi.com"
+                :user "apikey")
+               (getenv "KIMI_API_KEY")
+               (getenv "MOONSHOT_API_KEY")))
+    :header (lambda (_info)
+              (when-let* ((key (gptel--get-api-key)))
+                `(("Authorization" . ,(concat "Bearer " key))
+                  ("User-Agent" . "claude-code/0.1.0"))))
+    :stream t
+    :models '("kimi-k2.7-code-highspeed"
+              "kimi-k2.7-code"
+              "kimi-k2.6"
+              "kimi-k2.5"
+              "kimi-latest"))
+
+  ;; Pick a default. Change this from gptel-menu whenever needed.
+  (setq gptel-backend (gptel-get-backend "Kimi")
+        gptel-model "kimi-k2.7-code-highspeed"))
+
 (require 'eta)
 (require 'eta-hydra)
 (require 'eta-logger)

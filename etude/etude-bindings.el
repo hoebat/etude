@@ -101,7 +101,8 @@
   ::jump-search          ("C-l")      'swiper
   ::jump-same            ("C-x i" "C-x C-i") 'swiper-thing-at-point
   ::jump-bookmark        ()           'counsel-bookmark
-  ::jump-search-project  ("C-f")      'counsel-rg) 
+  ::jump-search-project  ("C-f")      'counsel-rg
+  ::jump-search-symbol   ("C-c s")    'color-rg-search-symbol) 
 
 ;;;
 ;; (System and Files)
@@ -303,8 +304,10 @@
 (pretty-hydra-define e/menu-fn::edit-menu
   (:title "<F2> Edit" :quit-key "z" :exit nil :foreign-keys run)
   ("Find/Replace"
-   (("f"    color-rg-search-project  "Find" :exit t)
-    ("r"    replace-string           "Replace" :exit t))
+   (("f"    color-rg-search-project      "Find project" :exit t)
+    ("s"    color-rg-search-symbol       "Find symbol" :exit t)
+    ("r"    replace-string               "Replace buffer" :exit t)
+    ("R"    projectile-replace-regexp    "Replace regexp project" :exit t))
    ""
    ()
    "Navigation"
@@ -335,6 +338,32 @@
             (if (eq hydra-curr-map e/menu-fn::edit-menu/keymap)
                 (hydra-keyboard-quit)
               (e/menu-fn::edit-menu/body)))))
+
+;;
+;; (Gptel)
+;;
+
+(eta-bind []
+  ::gptel-chat    ("C-c g g") 'gptel
+  ::gptel-send    ("C-c g s") 'gptel-send
+  ::gptel-rewrite ("C-c g r") 'gptel-rewrite
+  ::gptel-add     ("C-c g a") 'gptel-add)
+
+(pretty-hydra-define e/menu-fn::gptel-menu
+  (:title "Gptel" :quit-key "q" :exit t :foreign-keys run)
+  ("Chat"
+   (("g" gptel        "New chat")
+    ("s" gptel-send   "Send buffer/region")
+    ("a" gptel-add    "Add to context")
+    ("r" gptel-rewrite "Rewrite"))
+   "Options"
+   (("m" gptel-menu   "Menu"))))
+
+(eta-bind []
+  ::gptel-menu ("C-c G") 'e/menu-fn::gptel-menu/body)
+
+(defhydra+ e/menu-fn::edit-menu ()
+  ("G" e/menu-fn::gptel-menu/body "Gptel" :exit t))
 
 (pretty-hydra-define e/menu-fn::meta-menu
   (:title "<F3> Meta" :quit-key "z" :exit nil :foreign-keys run)
